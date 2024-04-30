@@ -1,6 +1,8 @@
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 
 #include "raylib.h"
@@ -79,6 +81,27 @@ void generate_new_title(Value board[BOARD_SIZE][BOARD_SIZE]) {
     y = GetRandomValue(0, BOARD_SIZE);
   }
   board[x][y] = 2;
+}
+
+void copy_board(const Value source[BOARD_SIZE][BOARD_SIZE],
+                Value dest[BOARD_SIZE][BOARD_SIZE]) {
+  memcpy(dest, source, sizeof(Value) * BOARD_SIZE * BOARD_SIZE);
+}
+
+bool is_board_equal(const Value b1[BOARD_SIZE][BOARD_SIZE],
+                    const Value b2[BOARD_SIZE][BOARD_SIZE]) {
+  return memcmp(b1, b2, sizeof(Value) * BOARD_SIZE * BOARD_SIZE) == 0;
+}
+
+bool is_board_full(const Value board[BOARD_SIZE][BOARD_SIZE]) {
+  for (int i = 0; i < BOARD_SIZE; ++i) {
+    for (int j = 0; j < BOARD_SIZE; ++j) {
+      if (board[i][j] == 0) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 void merge_row_left(Value row[BOARD_SIZE]) {
@@ -178,27 +201,40 @@ void push_down(Value board[BOARD_SIZE][BOARD_SIZE]) {
 }
 
 void update_board(Value board[BOARD_SIZE][BOARD_SIZE]) {
+  void (*push_fn)(Value board[BOARD_SIZE][BOARD_SIZE]) = NULL;
   int c = GetCharPressed();
-  bool is_updated = false;
   if (c == 'a') {
-    push_left(board);
-    is_updated = true;
+    push_fn = push_left;
   }
   if (c == 'd') {
-    push_right(board);
-    is_updated = true;
+    push_fn = push_right;
   }
   if (c == 's') {
-    push_up(board);
-    is_updated = true;
+    push_fn = push_up;
   }
   if (c == 'w') {
-    push_down(board);
-    is_updated = true;
+    push_fn = push_down;
   }
-  if (is_updated) {
-    generate_new_title(board);
+  if (push_fn == NULL) {
+    return;
   }
+
+  // TODO: push board
+  Value tmp[BOARD_SIZE][BOARD_SIZE];
+  copy_board(board, tmp);
+  push_fn(tmp);
+
+  if (is_board_equal(board, tmp)) {
+    return;
+  }
+  generate_new_title(tmp);
+
+  if (is_board_full(tmp)) {
+    // TODO: if is full, game over for now
+    printf("Game over\n");
+  }
+
+  copy_board(tmp, board);
 }
 
 int main(void) {
