@@ -7,20 +7,18 @@
 
 #include "raylib.h"
 
-typedef int64_t Value;
-
 // configure these values
 static const int BOARD_SIZE = 4;
 static const int GAME_WIDTH = 400;
 
-static const int UI_HEIGHT = 50;
+static const int BLOCK_WIDTH = GAME_WIDTH / BOARD_SIZE;
+static const int FONT_SIZE = BLOCK_WIDTH / 4;
+
 static const int GAME_PADDING = 10;
+static const int UI_HEIGHT = FONT_SIZE + 10;
 static const int GAME_HEIGHT = GAME_WIDTH;
 static const int SCR_WIDTH = GAME_WIDTH + GAME_PADDING;
 static const int SCR_HEIGHT = GAME_HEIGHT + UI_HEIGHT + GAME_PADDING;
-
-const int BLOCK_WIDTH = GAME_WIDTH / BOARD_SIZE;
-const int FONT_SIZE = BLOCK_WIDTH / 4;
 
 static const Color BLOCK_COLORS[] = {
     {225, 225, 225, 255}, // 0 - None
@@ -40,6 +38,7 @@ static const Color BLOCK_COLORS[] = {
     {251, 113, 133, 255}, // 8192
 };
 
+typedef int64_t Value;
 typedef void (*PushFn)(Value board[BOARD_SIZE][BOARD_SIZE]);
 
 int get_bit_num(Value value) {
@@ -51,30 +50,6 @@ int get_bit_num(Value value) {
   return counter;
 }
 
-void draw_game_board(const Value board[BOARD_SIZE][BOARD_SIZE]) {
-  const int padding = 2;
-  const int font_padding = 5;
-  char text[20];
-
-  for (int i = 0; i < BOARD_SIZE; ++i) {
-    for (int j = 0; j < BOARD_SIZE; ++j) {
-      const int top_left_x = j * (BLOCK_WIDTH + padding);
-      const int top_left_y = i * (BLOCK_WIDTH + padding);
-      const int value = board[i][j];
-      const int color_idx = get_bit_num(value);
-
-      sprintf(text, "%d", value);
-
-      DrawRectangle(top_left_x, top_left_y, BLOCK_WIDTH, BLOCK_WIDTH,
-                    BLOCK_COLORS[color_idx]);
-      if (value != 0) {
-        DrawText(text, top_left_x + font_padding, top_left_y + font_padding,
-                 FONT_SIZE, WHITE);
-      }
-    }
-  }
-}
-
 void generate_new_title(Value board[BOARD_SIZE][BOARD_SIZE]) {
   int x = GetRandomValue(0, BOARD_SIZE);
   int y = GetRandomValue(0, BOARD_SIZE);
@@ -83,6 +58,16 @@ void generate_new_title(Value board[BOARD_SIZE][BOARD_SIZE]) {
     y = GetRandomValue(0, BOARD_SIZE);
   }
   board[x][y] = 2;
+}
+
+Value calculate_score(const Value board[BOARD_SIZE][BOARD_SIZE]) {
+  Value score = 0;
+  for (int i = 0; i < BOARD_SIZE; ++i) {
+    for (int j = 0; j < BOARD_SIZE; ++j) {
+      score += board[i][j];
+    }
+  }
+  return score;
 }
 
 void copy_board(const Value source[BOARD_SIZE][BOARD_SIZE],
@@ -219,6 +204,7 @@ bool is_game_over(const Value board[BOARD_SIZE][BOARD_SIZE]) {
 
   return true;
 }
+
 void update_board(Value board[BOARD_SIZE][BOARD_SIZE]) {
   PushFn push_fn = NULL;
   int c = GetCharPressed();
@@ -255,6 +241,33 @@ void update_board(Value board[BOARD_SIZE][BOARD_SIZE]) {
   }
 
   copy_board(tmp, board);
+}
+
+void draw_game_board(const Value board[BOARD_SIZE][BOARD_SIZE]) {
+  const int padding = 2;
+  const int font_padding = 5;
+  char text[20];
+
+  const Value score = calculate_score(board);
+  sprintf(text, "Score: %lld", score);
+  DrawText(text, GAME_PADDING, GAME_HEIGHT + GAME_PADDING, FONT_SIZE, WHITE);
+
+  for (int i = 0; i < BOARD_SIZE; ++i) {
+    for (int j = 0; j < BOARD_SIZE; ++j) {
+      const int top_left_x = j * (BLOCK_WIDTH + padding);
+      const int top_left_y = i * (BLOCK_WIDTH + padding);
+      const int value = board[i][j];
+      const int color_idx = get_bit_num(value);
+
+      DrawRectangle(top_left_x, top_left_y, BLOCK_WIDTH, BLOCK_WIDTH,
+                    BLOCK_COLORS[color_idx]);
+      if (value != 0) {
+        sprintf(text, "%d", value);
+        DrawText(text, top_left_x + font_padding, top_left_y + font_padding,
+                 FONT_SIZE, WHITE);
+      }
+    }
+  }
 }
 
 int main(void) {
