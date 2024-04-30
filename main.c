@@ -13,9 +13,27 @@ static const int SCR_HEIGHT = SCR_WIDTH;
 static const int BOARD_SIZE = 8;
 
 static const Color BLOCK_COLORS[] = {
-    RAYWHITE, RED,  ORANGE, YELLOW, PINK,  GREEN, LIME,
-    SKYBLUE,  BLUE, PURPLE, VIOLET, BEIGE, BROWN, MAROON,
+    {225, 225, 225, 255}, // Block 0 - None
+    {225, 225, 225, 255}, // Block 1 - None
+    {255, 204, 21, 255},  // Block 2
+    {251, 146, 60, 255},  // Block 4
+    {248, 113, 113, 255}, // Block 8
+    {96, 165, 250, 255},  // Block 16
+    {74, 222, 128, 255},  // Block 32
+    {163, 230, 53, 255},  // Block 64
+    {52, 211, 153, 255},  // Block 128
+    {45, 212, 191, 255},  // Block 256
+    {129, 140, 248, 255}, // Block 512
+    {167, 139, 250, 255}, // Block 1024
+    {192, 132, 252, 255}, // Block 2048
+    {232, 121, 249, 255}, // Block 4096
+    {251, 113, 133, 255}, // Block 8192
 };
+
+// static const Color BLOCK_COLORS[] = {
+//     RAYWHITE, RAYWHITE, RED,    ORANGE, YELLOW, PINK,  GREEN,  LIME,
+//     SKYBLUE,  BLUE,     PURPLE, VIOLET, BEIGE,  BROWN, MAROON,
+// };
 
 int get_bit_num(Value value) {
   int counter = 0;
@@ -49,8 +67,10 @@ void draw_game_board(const Value board[BOARD_SIZE][BOARD_SIZE]) {
 
       DrawRectangle(top_left_x, top_left_y, block_width, block_width,
                     BLOCK_COLORS[color_idx]);
-      DrawText(text, top_left_x + font_padding, top_left_y + font_padding,
-               font_size, LIGHTGRAY);
+      if (value != 0) {
+        DrawText(text, top_left_x + font_padding, top_left_y + font_padding,
+                 font_size, WHITE);
+      }
     }
   }
 }
@@ -186,16 +206,15 @@ void update_board(Value board[BOARD_SIZE][BOARD_SIZE]) {
 }
 
 int main(void) {
-  // Value board[BOARD_SIZE][BOARD_SIZE] = {
-  //     [0] = {2, 4, 8, 16},
-  //     [1] = {32, 64, 128, 256},
-  //     [2] = {512, 1024, 2048, 4096},
-  //     [7] = {2, 0, 4, 2, 0, 0, 2, 16},
-  // };
-
   SetRandomSeed(124);
 
-  Value board[BOARD_SIZE][BOARD_SIZE] = {0};
+  Value board[BOARD_SIZE][BOARD_SIZE] = {
+      [0] = {2, 4, 8, 16},
+      [1] = {32, 64, 128, 256},
+      [2] = {512, 1024, 2048, 4096},
+      [7] = {2, 0, 4, 2, 0, 0, 2, 16},
+  };
+  // Value board[BOARD_SIZE][BOARD_SIZE] = {0};
 
   generate_new_title(board);
 
