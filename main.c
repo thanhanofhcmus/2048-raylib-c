@@ -40,6 +40,8 @@ static const Color BLOCK_COLORS[] = {
     {251, 113, 133, 255}, // 8192
 };
 
+typedef void (*PushFn)(Value board[BOARD_SIZE][BOARD_SIZE]);
+
 int get_bit_num(Value value) {
   int counter = 0;
   while (value != 0) {
@@ -200,8 +202,25 @@ void push_down(Value board[BOARD_SIZE][BOARD_SIZE]) {
   rotate_cw(board);
 }
 
+bool is_game_over(const Value board[BOARD_SIZE][BOARD_SIZE]) {
+  // check if game is over by trying to move left, right, up, down.
+  // if we can not move then the game is over
+  Value tmp[BOARD_SIZE][BOARD_SIZE];
+  const PushFn fns[] = {push_left, push_right, push_up, push_down};
+  const int len = sizeof(fns) / sizeof(PushFn);
+
+  for (int i = 0; i < len; ++i) {
+    copy_board(board, tmp);
+    fns[i](tmp);
+    if (!is_board_equal(board, tmp)) {
+      return false;
+    }
+  }
+
+  return true;
+}
 void update_board(Value board[BOARD_SIZE][BOARD_SIZE]) {
-  void (*push_fn)(Value board[BOARD_SIZE][BOARD_SIZE]) = NULL;
+  PushFn push_fn = NULL;
   int c = GetCharPressed();
   if (c == 'a') {
     push_fn = push_left;
@@ -219,7 +238,6 @@ void update_board(Value board[BOARD_SIZE][BOARD_SIZE]) {
     return;
   }
 
-  // TODO: push board
   Value tmp[BOARD_SIZE][BOARD_SIZE];
   copy_board(board, tmp);
   push_fn(tmp);
@@ -227,10 +245,12 @@ void update_board(Value board[BOARD_SIZE][BOARD_SIZE]) {
   if (is_board_equal(board, tmp)) {
     return;
   }
-  generate_new_title(tmp);
 
-  if (is_board_full(tmp)) {
-    // TODO: if is full, game over for now
+  if (!is_board_full(tmp)) {
+    generate_new_title(tmp);
+  }
+
+  if (is_game_over(tmp)) {
     printf("Game over\n");
   }
 
