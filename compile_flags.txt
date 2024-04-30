@@ -1,0 +1,9 @@
+-I/usr/local/Cellar/raylib/5.0/include
+-L/usr/local/Cellar/raylib/5.0/lib
+-lraylib
+-xc
+-std=c17
+-Wall
+-Wetrax
+-Werror
+-pedantic
