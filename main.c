@@ -1,7 +1,9 @@
-#include "raylib.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <time.h>
+
+#include "raylib.h"
 
 typedef int64_t Value;
 
@@ -51,6 +53,16 @@ void draw_game_board(const Value board[BOARD_SIZE][BOARD_SIZE]) {
                font_size, LIGHTGRAY);
     }
   }
+}
+
+void generate_new_title(Value board[BOARD_SIZE][BOARD_SIZE]) {
+  int x = GetRandomValue(0, BOARD_SIZE);
+  int y = GetRandomValue(0, BOARD_SIZE);
+  while (board[x][y] != 0) {
+    x = GetRandomValue(0, BOARD_SIZE);
+    y = GetRandomValue(0, BOARD_SIZE);
+  }
+  board[x][y] = 2;
 }
 
 void merge_row_left(Value row[BOARD_SIZE]) {
@@ -151,27 +163,41 @@ void push_down(Value board[BOARD_SIZE][BOARD_SIZE]) {
 
 void update_board(Value board[BOARD_SIZE][BOARD_SIZE]) {
   int c = GetCharPressed();
+  bool is_updated = false;
   if (c == 'a') {
     push_left(board);
+    is_updated = true;
   }
   if (c == 'd') {
     push_right(board);
+    is_updated = true;
   }
   if (c == 's') {
     push_up(board);
+    is_updated = true;
   }
   if (c == 'w') {
     push_down(board);
+    is_updated = true;
+  }
+  if (is_updated) {
+    generate_new_title(board);
   }
 }
 
 int main(void) {
-  Value board[BOARD_SIZE][BOARD_SIZE] = {
-      [0] = {2, 4, 8, 16},
-      [1] = {32, 64, 128, 256},
-      [2] = {512, 1024, 2048, 4096},
-      [7] = {2, 0, 4, 2, 0, 0, 2, 16},
-  };
+  // Value board[BOARD_SIZE][BOARD_SIZE] = {
+  //     [0] = {2, 4, 8, 16},
+  //     [1] = {32, 64, 128, 256},
+  //     [2] = {512, 1024, 2048, 4096},
+  //     [7] = {2, 0, 4, 2, 0, 0, 2, 16},
+  // };
+
+  SetRandomSeed(124);
+
+  Value board[BOARD_SIZE][BOARD_SIZE] = {0};
+
+  generate_new_title(board);
 
   InitWindow(SCR_WIDTH, SCR_HEIGHT, "2048");
 
