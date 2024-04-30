@@ -51,11 +51,11 @@ int get_bit_num(Value value) {
 }
 
 void generate_new_title(Value board[BOARD_SIZE][BOARD_SIZE]) {
-  int x = GetRandomValue(0, BOARD_SIZE);
-  int y = GetRandomValue(0, BOARD_SIZE);
+  int x = GetRandomValue(0, BOARD_SIZE - 1);
+  int y = GetRandomValue(0, BOARD_SIZE - 1);
   while (board[x][y] != 0) {
-    x = GetRandomValue(0, BOARD_SIZE);
-    y = GetRandomValue(0, BOARD_SIZE);
+    x = GetRandomValue(0, BOARD_SIZE - 1);
+    y = GetRandomValue(0, BOARD_SIZE - 1);
   }
   board[x][y] = 2;
 }
