@@ -1,6 +1,7 @@
-.PHONY: build
-build: main.o
-	cc main.c -Wall -Wextra -Werror -pedantic $(shell pkg-config --libs --cflags raylib) -o main
+build: main.c
+	cc -c main.c -o out/main.o -Wall -Wextra -Werror -pedantic $(shell pkg-config --cflags raylib)
+	cc out/main.o -o out/main $(shell pkg-config --libs raylib)
+
 
 run: build
-	./main
+	./out/main
